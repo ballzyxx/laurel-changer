@@ -18,7 +18,7 @@ module.exports = function LaurelChanger(mod) {
     };
 
     const HOOK_OPTS = { order: 10000, filter: { fake: null } };
-    const RESEND_DELAYS = [500, 1500, 3000, 5000, 8000, 12000, 18000];
+    const RESEND_DELAYS = [0, 50, 150, 400, 1200, 3000, 7000];
 
     let desiredLaurel = (mod.settings && mod.settings.laurel !== undefined) ? mod.settings.laurel : 5;
     let lastAchievementEvent = null;
@@ -46,6 +46,7 @@ module.exports = function LaurelChanger(mod) {
                 achievementListVersion = 1;
                 lastAchievementEvent = parsed;
             }
+            if (lastAchievementEvent && achievementListVersion) achievementSeeded = true;
         } catch (_) { /* ignore — first run or corrupt file */ }
     }
 
@@ -121,6 +122,20 @@ module.exports = function LaurelChanger(mod) {
         return changed;
     }
 
+    function patchAppearance(event) {
+        if (!event) return false;
+        let changed = false;
+        if (event.laurel !== undefined && event.laurel !== desiredLaurel) {
+            event.laurel = desiredLaurel;
+            changed = true;
+        }
+        if (event.achievementLevel !== undefined && event.achievementLevel !== desiredLaurel) {
+            event.achievementLevel = desiredLaurel;
+            changed = true;
+        }
+        return changed;
+    }
+
     function storeAchievementSnapshot(event, version) {
         lastAchievementEvent = cloneAchievementEvent(event);
         achievementListVersion = version;
@@ -159,7 +174,8 @@ module.exports = function LaurelChanger(mod) {
     // ---------- Resend orchestration ----------
 
     function scheduleResendBurst() {
-        if (!achievementSeeded || !lastAchievementEvent || !achievementListVersion) return;
+        if (!lastAchievementEvent || !achievementListVersion) return;
+        achievementSeeded = true;
         for (const delay of RESEND_DELAYS) {
             mod.setTimeout(() => resendAchievement(), delay);
         }
@@ -191,11 +207,19 @@ module.exports = function LaurelChanger(mod) {
         } catch (_) { /* silently fail individual resend */ }
     }
 
-    mod.tryHook('S_LOGIN', '*', () => {
-        achievementSeeded = false;
+    mod.tryHook('S_LOGIN', '*', (event) => {
+        if (lastAchievementEvent && achievementListVersion) achievementSeeded = true;
+        const changed = patchAppearance(event);
+        scheduleResendBurst();
+        if (changed) return true;
     });
 
-    mod.hook('S_SPAWN_ME', '*', () => scheduleResendBurst());
+    mod.tryHook('S_SPAWN_ME', '*', (event) => {
+        const changed = patchAppearance(event);
+        scheduleResendBurst();
+        if (changed) return true;
+    });
+
     mod.hook('S_LOAD_TOPO', '*', () => scheduleResendBurst());
 
     let onChangeZone = null;
