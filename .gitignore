@@ -1,0 +1,5 @@
+config.json
+module.config.json
+achievement_cache.json
+scripts/*
+!scripts/generate-manifest.js
