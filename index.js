@@ -73,6 +73,14 @@ module.exports = function LaurelChanger(mod) {
         return desiredLaurel === 0 ? 0 : (laurelPointsMap[desiredLaurel] || 9999);
     }
 
+    function bindCacheToMe(event) {
+        if (!lastAchievementEvent || !event) return;
+        const gid = event.gameId !== undefined ? event.gameId : event.cid;
+        if (gid === undefined) return;
+        if (lastAchievementEvent.cid !== undefined) lastAchievementEvent.cid = gid;
+        if (lastAchievementEvent.gameId !== undefined) lastAchievementEvent.gameId = gid;
+    }
+
     function cloneAchievementEvent(event) {
         if (!event) return null;
         const clone = Object.assign({}, event);
@@ -208,6 +216,7 @@ module.exports = function LaurelChanger(mod) {
     }
 
     mod.tryHook('S_LOGIN', '*', (event) => {
+        bindCacheToMe(event);
         if (lastAchievementEvent && achievementListVersion) achievementSeeded = true;
         const changed = patchAppearance(event);
         scheduleResendBurst();
@@ -215,6 +224,7 @@ module.exports = function LaurelChanger(mod) {
     });
 
     mod.tryHook('S_SPAWN_ME', '*', (event) => {
+        bindCacheToMe(event);
         const changed = patchAppearance(event);
         scheduleResendBurst();
         if (changed) return true;

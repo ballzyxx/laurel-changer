@@ -1,11 +1,11 @@
 {
     "disableAutoUpdate": false,
     "name": "laurel-changer",
-    "version": "2.8",
+    "version": "2.9",
     "author": "ballzyxx",
     "description": "Persistent client-side laurel override. Survives zone changes, loading screens, and relogs.",
     "servers": [
-        "https://cdn.jsdelivr.net/gh/ballzyxx/laurel-changer@v2.8/"
+        "https://cdn.jsdelivr.net/gh/ballzyxx/laurel-changer@v2.9/"
     ],
     "options": {
         "cliName": "Laurel Changer",
