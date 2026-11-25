@@ -298,11 +298,6 @@ module.exports = function LaurelChanger(mod) {
         if (changed) return true;
     });
 
-    mod.tryHook('S_SPAWN_USER', '*', HOOK_OPTS, (event) => {
-        const changed = patchAppearance(event);
-        if (changed) return true;
-    });
-
     mod.hook('S_LOAD_TOPO', '*', () => scheduleResendBurst());
 
     let onChangeZone = null;

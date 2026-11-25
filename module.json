@@ -1,7 +1,7 @@
 {
     "disableAutoUpdate": false,
     "name": "laurel-changer",
-    "version": "2.11",
+    "version": "2.12",
     "author": "ballzyxx",
     "description": "Persistent client-side laurel override. Survives zone changes, loading screens, and relogs.",
     "servers": [
